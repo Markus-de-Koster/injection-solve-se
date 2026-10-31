@@ -1,0 +1,12 @@
+# outputs of the reproduction (datasets, runs, tables, figures)
+/outputs/
+# the pixi environments
+.pixi/
+# the Mack et al. code, fetched at its pinned commit by mack/setup.sh
+/mack/external/
+/mack/.pixi/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+mlruns/

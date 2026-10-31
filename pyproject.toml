@@ -1,0 +1,48 @@
+# Packaging of the reproduction: the vendored estimator code (import name `injection_hse`)
+# and the paper's evaluation, figures and command-line entry (import name `se_ablation`).
+# The environment itself is set up with pixi (`pixi.toml`); the only external package of
+# the study is `power-grid-ml` (import name `pgml`), pinned to its 0.6.0 release commit.
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "se-ablation"
+version = "1.0.0"
+description = "Reproduction of an injection-domain harmonic state estimation study on the CIGRE LV benchmark"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "power-grid-ml[scenarios,convert,viz] @ git+https://github.com/power-grid-ml/pgml.git@21fcafc71c0550ab2c4f4f914a7a7ba81397f877",
+    "lightning>=2.6,<3",
+    "torch-geometric",
+    "mlflow>=3.10,<4",
+    "polars>=1.39,<2",
+    "pandas>=2.3,<3",
+    "pyyaml>=6,<7",
+    "numpy>=2,<3",
+    "scipy>=1.11",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=9,<10", "ruff>=0.15,<0.16"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/injection_hse", "src/se_ablation"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "gpu: requires a CUDA device (skipped on CPU-only hosts)",
+    "opendss: runs a live OpenDSS solve via opendssdirect (slower, oracle tests)",
+    "slow: long-running test",
+]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["src/injection_hse", "tests/injection_hse", "tests/differentiability",
+                  "tests/gpu", "run/examples/injection_hse", "mack"]

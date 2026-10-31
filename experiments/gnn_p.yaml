@@ -1,0 +1,79 @@
+# GNN-P [ours]
+#
+# The paper model: GINE (6 layers, width 128) with a GRU over the 8 steps, predicting a
+# correction to the linear map (ridge prior fitted on 40 000 training states at the deployed
+# placement; the correction's output layer starts at zero), decoded by the anchored network
+# solve; trained at the deployed placement. The optimizer state is carried across the
+# passes and every pass after the first warms the learning rate up over 3 epochs.
+#
+# The arguments of the workflow driver after the output directory, in the order of the
+# paper run (argparse keeps the last value of an option given twice). {configs} is the
+# repository's run/configs directory.
+name: gnn_p
+display: "GNN-P [ours]"
+kind: train
+args:
+  - --collect-gradients
+  - --orders 1,3,5,7,9
+  - --n-random 50000
+  - --n-scenarios 4000
+  - --n-steps 8
+  - --epochs 200
+  - --batch-size 256
+  - --num-workers 4
+  - --device cuda
+  - --no-progress
+  - --target-full 1e-5
+  - --target-placement 1e-4
+  - "--scenario-config {configs}/pgl_se_scenario_v4.yaml"
+  - --orders 1,3,5,7,9,11,13,15,17,19
+  - "--device-capacitance {configs}/pgl_device_capacitance.yaml"
+  - --source-impedance cigre-tb575
+  - --load-shunt opendss
+  - --load-shunt-basis nameplate
+  - "--grid-perturbation {configs}/pgl_grid_perturbation.yaml"
+  - --perturb-test heldout
+  - --n-steps 8
+  - --chunk-size 2000
+  - --lr 3e-4
+  - --grad-clip 0.3
+  - --patience 20
+  - --min-delta 5e-6
+  - --target-full 1e-6
+  - --target-placement 1e-6
+  - --placement-scheduler none
+  - --dtype complex128
+  - --train-dtype complex64
+  - --val-fraction 0.2
+  - --test-fraction 0.1
+  - --measure-currents
+  - --current-channels upstream
+  - --noise-class A
+  - --num-workers 4
+  - --noise-draw-device input
+  - --no-curriculum
+  - --per-unit
+  - --n-random 200000
+  - --n-scenarios 20000
+  - --epochs 28
+  - --anneal-epochs 20
+  - --batch-size 256
+  - --effective-batch 1024
+  - "--anchor-schedule full:0,random_50:0~0.5/0~0.05,random_25:0~1/0~0.1,random_10:0.2~1.5/0.02~0.15,placement:0.5~2/0.05~0.2,placement_anneal:0.5~3/0.05~0.3"
+  - --injection-encoding cartesian
+  - --seed 0
+  - --prior-residual
+  - --prior-fit-states 40000
+  - --carry-optimizer-state
+  - --stage-warmup 3
+# appended for a smoke run (--smoke): small data, one epoch per unit, CPU-sized batches
+smoke:
+  - --n-random 400
+  - --n-scenarios 40
+  - --epochs 1
+  - --anneal-epochs 1
+  - --batch-size 16
+  - --effective-batch 32
+  - --num-workers 0
+  - --chunk-size 200
+  - --prior-fit-states 400

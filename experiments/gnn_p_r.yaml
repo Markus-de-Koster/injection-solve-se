@@ -1,0 +1,88 @@
+# GNN-P-R [ours]
+#
+# GNN-P without the linear start, trained on random sensor sets that observe 10 % of the
+# buses (the slack always), drawn per sample, then continued in its last pass
+# (se_ablation.continuation): from the final checkpoint with its optimizer state, a 3-epoch
+# warm-up to 3e-4, constant 3e-4 until the plateau stop or 92 more epochs, then a 15-epoch
+# cosine re-anneal. The paper scores the re-annealed checkpoint
+# (continued/checkpoints/stage_placement_anneal_reanneal.ckpt).
+#
+# The arguments of the workflow driver after the output directory, in the order of the
+# paper run (argparse keeps the last value of an option given twice). {configs} is the
+# repository's run/configs directory.
+name: gnn_p_r
+display: "GNN-P-R [ours]"
+kind: train
+args:
+  - --collect-gradients
+  - --orders 1,3,5,7,9
+  - --n-random 50000
+  - --n-scenarios 4000
+  - --n-steps 8
+  - --epochs 200
+  - --batch-size 256
+  - --num-workers 4
+  - --device cuda
+  - --no-progress
+  - --target-full 1e-5
+  - --target-placement 1e-4
+  - "--scenario-config {configs}/pgl_se_scenario_v4.yaml"
+  - --orders 1,3,5,7,9,11,13,15,17,19
+  - "--device-capacitance {configs}/pgl_device_capacitance.yaml"
+  - --source-impedance cigre-tb575
+  - --load-shunt opendss
+  - --load-shunt-basis nameplate
+  - "--grid-perturbation {configs}/pgl_grid_perturbation.yaml"
+  - --perturb-test heldout
+  - --n-steps 8
+  - --chunk-size 2000
+  - --lr 3e-4
+  - --grad-clip 0.3
+  - --patience 20
+  - --min-delta 5e-6
+  - --target-full 1e-6
+  - --target-placement 1e-6
+  - --placement-scheduler none
+  - --dtype complex128
+  - --train-dtype complex64
+  - --val-fraction 0.2
+  - --test-fraction 0.1
+  - --measure-currents
+  - --current-channels upstream
+  - --noise-class A
+  - --num-workers 4
+  - --noise-draw-device input
+  - --no-curriculum
+  - --per-unit
+  - --n-random 200000
+  - --n-scenarios 20000
+  - --epochs 22
+  - --anneal-epochs 20
+  - --batch-size 256
+  - --effective-batch 1024
+  - "--anchor-schedule full:0,random_50:0~0.5/0~0.05,random_25:0~1/0~0.1,random_10:0.2~1.5/0.02~0.15,placement:0.5~2/0.05~0.2,placement_anneal:0.5~3/0.05~0.3"
+  - --injection-encoding cartesian
+  - --direct-random-fraction 0.1
+  - --seed 0
+# appended for a smoke run (--smoke): small data, one epoch per unit, CPU-sized batches
+smoke:
+  - --n-random 400
+  - --n-scenarios 40
+  - --epochs 1
+  - --anneal-epochs 1
+  - --batch-size 16
+  - --effective-batch 32
+  - --num-workers 0
+  - --chunk-size 200
+# the continuation after the driver run: options of se_ablation.continuation
+continuation:
+  - --epochs 92
+  - --anneal-epochs 15
+  - --warmup 3
+  - --lr 3e-4
+  - --device cuda
+# appended to the continuation of a smoke run
+continuation_smoke:
+  - --epochs 1
+  - --anneal-epochs 1
+  - --warmup 1

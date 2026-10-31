@@ -1,0 +1,144 @@
+# Measured-population expectations for `pgl.data.validate` (the third, optional layer).
+#
+#   python -m pgl.data.validate <dataset|corpus|run dir> --reference run/configs/expected_ranges.yaml
+#
+# Layout: {quantity: {order (or `all`): {p50, p95, hard_min, hard_max}}}. Every bound is
+# optional — state only what is actually known; a missing bound skips its check. `p50` is
+# checked as an ORDER OF MAGNITUDE: a realized median off by more than 3x warns, more than
+# 10x fails. `hard_min` / `hard_max` fail on containment of the median. `source` and `note`
+# are documentation and are ignored by the reader.
+#
+# Provenance classes; every entry names its own:
+#   - `standard`          — a published limit (DIN EN 50160 supply-voltage levels).
+#   - `extrapolated`      — no published level at this order (EN 50160 stops at h25); the
+#     IEC 61000-2-2 pattern continued (`pgl.data.validate.harmonic_voltage_limits`).
+#   - `measurement`       — a measured population, citation in `note`.
+#   - `plausibility-bound` — a decade-wide sanity bound, NOT a measurement: it only catches
+#     an emission model off by an order of magnitude or more (a reference read in the
+#     wrong units). No central value is stated where no measurement supports one.
+#
+# Calibration class: the current entries describe an LV distribution feeder. A synthetic MV
+# feeder driven by the same household-scale device roster lands well below them (the roster
+# is diluted against MV-sized loads); a FAIL there is a grid-class mismatch, not a generator
+# regression. Check which injection quantity a report measured (its `notes[0]`) before
+# comparing it with the blocks below.
+#
+# Why the node-level bounds sit an order of magnitude below the DEVICE-level ones:
+# the device populations are tabulated per appliance (an SMPS injects 50-85 % of its own
+# fundamental at h3), while these entries apply to a NODE — an aggregated load whose roster
+# mixes strongly emitting electronics with near-linear resistive and motor load, and whose
+# per-device emission angles partly cancel. The node aggregate therefore sits well below the
+# worst device in it, and that is what the validator measures.
+
+# Reconstructed nodal injection current at the device rows, as a percentage of the row's own
+# fundamental current: I(h) = Y(h)*V(h). THE check that catches a mis-referenced emission
+# model — reading DIN EN 50160 supply-VOLTAGE levels as per-device CURRENT fractions puts
+# every entry below 1 %. The only measured node-level population in the parameter sources
+# is the aggregate h3 of residential service transformers (Xiao et al. 2021, 44 sets at
+# 14 transformers: IHD3 lognormal, median 8.7 %, p95 17 %); a CIGRE LV load is such an
+# aggregate. Other orders carry plausibility bounds only.
+i_h_ratio_pct:
+  3:
+    p50: 8.7
+    p95: 17.0
+    hard_min: 0.05
+    hard_max: 250.0
+    source: measurement
+    note: Xiao et al. 2021, aggregate h3 at Chinese residential service transformers (IHD3 lognormal mu 2.17, sigma 0.41); bounds are plausibility bounds.
+  5: {hard_min: 0.05, hard_max: 200.0, source: plausibility-bound}
+  7: {hard_min: 0.03, hard_max: 150.0, source: plausibility-bound}
+  9: {hard_min: 0.02, hard_max: 100.0, source: plausibility-bound}
+  11: {hard_min: 0.01, hard_max: 80.0, source: plausibility-bound}
+  13: {hard_min: 0.01, hard_max: 60.0, source: plausibility-bound}
+  15: {hard_min: 0.005, hard_max: 50.0, source: plausibility-bound}
+  17: {hard_min: 0.005, hard_max: 50.0, source: plausibility-bound}
+  19: {hard_min: 0.005, hard_max: 40.0, source: plausibility-bound}
+
+# Realized per-device EMISSION current, as a percentage of the device's own fundamental —
+# the persisted `<key>_mag` sample columns (`injection_source="auto"` prefers them over the
+# nodal reconstruction above). The measured device numbers in the parameter sources are per
+# CLASS (Blanco et al. 2015: SMPS without PFC THDi 100-230 %, CFL <= 25 W h3 ~80 %, h5
+# ~50 %, h7-h11 ~20 %; Mack et al. 2024 tab. A1: EV charger h3 8.4, h5 2.1, h7 3.6, h9 1.3,
+# h11 1.2, h13 0.4 %; PV inverter h3 0.45, h5 1.8, h7 2.2, h11 0.24 %), not the median of a
+# mixed population, so no central value is stated; the bounds are plausibility bounds.
+i_h_emission_pct:
+  3: {hard_min: 0.5, hard_max: 200.0, source: plausibility-bound}
+  5: {hard_min: 0.3, hard_max: 150.0, source: plausibility-bound}
+  7: {hard_min: 0.2, hard_max: 120.0, source: plausibility-bound}
+  9: {hard_min: 0.1, hard_max: 80.0, source: plausibility-bound}
+  11: {hard_min: 0.05, hard_max: 60.0, source: plausibility-bound}
+  13: {hard_min: 0.05, hard_max: 50.0, source: plausibility-bound}
+  15: {hard_min: 0.02, hard_max: 40.0, source: plausibility-bound}
+  17: {hard_min: 0.02, hard_max: 40.0, source: plausibility-bound}
+  19: {hard_min: 0.02, hard_max: 30.0, source: plausibility-bound}
+
+# Harmonic voltage as a percentage of the fundamental. The hard maxima ARE the DIN EN 50160
+# compatibility levels to h25 and the IEC 61000-2-2 pattern above (the validator applies the
+# same table, `harmonic_voltage_limits`; they are repeated here so a deviating campaign can
+# override them). No p50 is stated: the typical
+# harmonic voltage of a feeder depends on its source impedance and cable population, and a
+# central value nobody measured would only produce noise.
+v_h_ratio_pct:
+  2: {hard_max: 2, source: standard, note: DIN EN 50160 (amended) compatibility level}
+  3: {hard_max: 5, source: standard}
+  4: {hard_max: 1, source: standard}
+  5: {hard_max: 6, source: standard}
+  6: {hard_max: 0.5, source: standard}
+  7: {hard_max: 5, source: standard}
+  8: {hard_max: 0.5, source: standard}
+  9: {hard_max: 1.5, source: standard}
+  10: {hard_max: 0.5, source: standard}
+  11: {hard_max: 3.5, source: standard}
+  12: {hard_max: 0.5, source: standard}
+  13: {hard_max: 3, source: standard}
+  14: {hard_max: 0.5, source: standard}
+  15: {hard_max: 1, source: standard}
+  16: {hard_max: 0.5, source: standard}
+  17: {hard_max: 2, source: standard}
+  18: {hard_max: 0.5, source: standard}
+  19: {hard_max: 1.5, source: standard}
+  20: {hard_max: 0.5, source: standard}
+  21: {hard_max: 0.75, source: standard}
+  22: {hard_max: 0.5, source: standard}
+  23: {hard_max: 1.5, source: standard}
+  24: {hard_max: 0.5, source: standard}
+  25: {hard_max: 1.5, source: standard}
+  26: {hard_max: 0.346, source: extrapolated, note: IEC 61000-2-2 pattern above the EN 50160 table}
+  27: {hard_max: 0.2, source: extrapolated}
+  28: {hard_max: 0.339, source: extrapolated}
+  29: {hard_max: 1.06, source: extrapolated}
+  30: {hard_max: 0.333, source: extrapolated}
+  31: {hard_max: 0.975, source: extrapolated}
+  32: {hard_max: 0.328, source: extrapolated}
+  33: {hard_max: 0.2, source: extrapolated}
+  34: {hard_max: 0.324, source: extrapolated}
+  35: {hard_max: 0.833, source: extrapolated}
+  36: {hard_max: 0.319, source: extrapolated}
+  37: {hard_max: 0.773, source: extrapolated}
+  38: {hard_max: 0.316, source: extrapolated}
+  39: {hard_max: 0.2, source: extrapolated}
+  40: {hard_max: 0.312, source: extrapolated}
+  41: {hard_max: 0.671, source: extrapolated}
+  42: {hard_max: 0.31, source: extrapolated}
+  43: {hard_max: 0.627, source: extrapolated}
+  44: {hard_max: 0.307, source: extrapolated}
+  45: {hard_max: 0.2, source: extrapolated}
+  46: {hard_max: 0.304, source: extrapolated}
+  47: {hard_max: 0.551, source: extrapolated}
+  48: {hard_max: 0.302, source: extrapolated}
+  49: {hard_max: 0.518, source: extrapolated}
+  50: {hard_max: 0.3, source: extrapolated}
+
+# Per-sample aggregate power quality (max over the energized non-neutral rows of a sample).
+# No central value is stated for the THD: unlike a per-device emission fraction it is a
+# property of the NETWORK and of the solved order set (a stiff feeder excited at two orders
+# lands an order of magnitude below the same recipe on a soft feeder over twenty), so a
+# single p50 would fail honest datasets. Fill p50 / p95 in from a campaign on the feeder the
+# datasets model — on CIGRE LV the calibrated preset reproduces a median near 3.2 % and a
+# p99 near 5.8 %.
+thd_pct:
+  all: {hard_max: 8.0, source: standard, note: DIN EN 50160 total harmonic distortion}
+vuf_pct:
+  all: {hard_max: 2.0, source: standard, note: DIN EN 50160 voltage unbalance}
+vdev_pct:
+  all: {hard_max: 10.0, source: standard, note: DIN EN 50160 +/-10 % supply voltage}

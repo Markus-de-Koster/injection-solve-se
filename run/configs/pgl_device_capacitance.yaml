@@ -1,0 +1,29 @@
+# Device capacitance at the grid terminals: EMC / X-capacitors of electronic loads and the
+# output filters of PV inverters, which set the first parallel resonance of an LV grid.
+# Used by: --device-capacitance of run/examples/pgl/train_se_full_workflow.py (the grid
+# build). One wye ShuntAppliance per load and per PV generator, at the device's node, with
+#   C per phase = density [uF/kW] * rated active power [kW] / number of phases,
+# the density drawn ONCE per device from a log-uniform range (stream keyed by `seed` and the
+# device id). The shunts are written into grid.json, so the estimator's Y(h) contains them.
+#
+# Sources: household aggregate 0.6-6 uF per house (Enslin &
+# Heskes 2004, via Cuk et al. 2012), about 8 uF per household implied by the 480 Hz
+# resonance measured by Meyer et al. 2017, recommended LogUniform(0.6, 8) uF per house; at a
+# household equivalent of about 3 kW that is 0.2-2.7 uF/kW. PV inverters 0.5-10 uF per
+# 1-3 kW unit (Enslin & Heskes via Cuk 2012; Cuk used 2 and 8 uF per 2 kW), recommended
+# 1-4 uF/kW.
+# Commercial (office) and industrial (workshop) loads: no per-kW measurement was found in
+# the sources. They take the household range as an ASSUMPTION — their nonlinear share is
+# electronics and inverter drives with the same kind of input filter; PF-correction banks are
+# excluded by decision (none in the published benchmark, no prevalence data).
+device_capacitance:
+  seed: 0
+  # log-uniform [low, high] uF per kW of rated active power, keyed by the load's
+  # consumer_type; `default` covers any load whose type is not listed (or unset)
+  load_uf_per_kw:
+    household: [0.2, 2.7]
+    office: [0.2, 2.7]      # assumption: household range (see header)
+    workshop: [0.2, 2.7]    # assumption: household range (see header)
+    default: [0.2, 2.7]
+  # PV generators (consumer_type pv)
+  pv_uf_per_kw: [1.0, 4.0]

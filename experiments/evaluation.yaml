@@ -1,0 +1,29 @@
+# Evaluation data
+#
+# The data every estimator is scored on: 2 000 sequences of 8 steps (15 min each) from the
+# training recipe with its own seed, solved on the nominal grid (dataset_coherent) and, from
+# the same scenario draw, on 8 held-out perturbed grid copies (dataset_coherent_heldout,
+# the test pool of pgl_grid_perturbation.yaml, RMS log-factor 7.5-9.6 %). Seed 0 shares the
+# device population of the training runs (the site; --site overrides the seed).
+#
+# The arguments of generate_se_task_datasets.py after the output directory.
+name: evaluation
+display: "evaluation data"
+kind: data
+args:
+  - "--scenario-config {configs}/pgl_se_scenario_v4.yaml"
+  - --orders 1,3,5,7,9,11,13,15,17,19
+  - "--device-capacitance {configs}/pgl_device_capacitance.yaml"
+  - --source-impedance cigre-tb575
+  - --load-shunt opendss
+  - --load-shunt-basis nameplate
+  - --n-scenarios 2000
+  - --n-steps 8
+  - --seed 0
+  - --skip-random
+  - "--grid-perturbation {configs}/pgl_grid_perturbation.yaml"
+  - --perturbation-sets nominal,heldout
+  - --perturb-test-copies 8
+# appended for a smoke run (--smoke)
+smoke:
+  - --n-scenarios 40

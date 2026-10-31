@@ -1,0 +1,818 @@
+# Scenario recipe v4: a DEVIATION layer over the calibrated preset
+# (pgl.data.scenarios.presets, v3), passed with
+#   train_se_full_workflow.py --scenario-config run/configs/pgl_se_scenario_v4.yaml
+# As in pgl_se_scenario.yaml (the v3 recipe, whose comments explain every spec), a section
+# REPLACES the preset's shape wholesale; the sizes, seed and solved orders come from the CLI.
+# Solve the odd orders 1..19 (--orders 1,3,5,7,9,11,13,15,17,19). Sizes, seeds, orders
+# and the coherent selector written below are placeholders the driver overrides.
+#
+# Changes against v3 (literature named where used):
+# - Load emission of the snapshots sized like the composed sequences' aggregates. v3 drew
+#   each CIGRE load's harmonic current as U(0, 2) x the IEC 61000-3-2 cap of a device of the
+#   aggregate's nominal power — a few per mille of a 100 kW load's own current — while the
+#   PV generators drew an absolute fraction of their own current, so the snapshots'
+#   harmonic current came almost entirely from PV (78-98 % at h5-h19 against 0.6-3.3 % in
+#   the composed sequences). v4 gives each load a per-order ratio of its OWN fundamental
+#   current, Uniform(0, a) per consumer type (household / office / workshop), with
+#   a = sqrt(3) x the |I1|^2-weighted RMS ratio the shipped composition produces for that
+#   type (64 sequences x 8 steps x 3 seeds on CIGRE LV), so a load type injects the same
+#   harmonic current energy in both tasks. The ratio is redrawn per snapshot (the momentary
+#   device mix of an aggregate) and the per-device emission law is NOT applied to loads: an
+#   aggregate of many devices keeps a flat ratio over its loading (composed sequences: h3
+#   median 0.11 at low and 0.12 at high loading), where the device law inflated the v3
+#   snapshot ratio 10x at light load. Loads of other consumer types get no harmonic
+#   emission here.
+# - PV generator emission of the snapshots at the composition's pv_inverter class ranges
+#   (rated ratio, e.g. h5 0.02-0.07), so PV is the same device in both tasks. v3's spans
+#   (h5 up to 0.15) reached above the class values to cover the rise at low output, which
+#   the emission law now models on top: the v3 snapshots' median PV h5 ratio was 0.18.
+# - Emission persistence per DEVICE where a device is one device: the PV generators'
+#   emission fraction, angle and law (floor, floor angle, slope) and every load's emission
+#   angle are `per: fixed`, drawn once per device for the whole dataset.
+# - Emission ANGLES from a normal distribution instead of uniform spans, centred where v3
+#   centred them (0 deg on the device's reference spectrum): SD 32.5 deg for h3-h9 and
+#   65 deg for h11-h19, the midpoints of the recommended 25-40 / 50-80 deg. Their mean
+#   resultant lengths, exp(-SD^2/2) = 0.85 and 0.53, match the measured feeder-level
+#   diversity factors (> 0.8 for h <= 9, 0.7-0.4 above; Blanco, Meyer, Schegner 2014); v3's
+#   uniform +/-90 / +/-120 deg at h7 / h9 gave 0.64 / 0.41.
+# - The composed sequences (coherent:) keep the preset's recipe and shipped device library,
+#   with every class's per-order angle range set to the uniform half-width of the same mean
+#   resultant length (+/-55 deg for h3-h9, +/-105 deg for h11-h19), and the fingerprint of
+#   the devices no composition covers (the PV generators) on Normal(0, 32.5 deg) — one
+#   distribution for all orders, chosen for the dominant inverter orders h5/h7. A roster
+#   given here replaces the library, so --activity-scale / --behavioral-coupling /
+#   --cloud-coupling are read from this file, not from the CLI.
+# - Unchanged: PV emission is on and keeps its load-dependent emission law; the
+#   operating-point draws (load / PV / slack scale); orders.
+#
+# Upstream background (non-triplen orders only; triplens are blocked by the Dyn
+# transformers and arise in the LV grid) stays a driver flag, e.g.
+#   --background-distortion '5:0.008@20,7:0.006@180,11:0.003@-50,13:0.003@50,17:0.0015,19:0.0015'
+#   --background-drift 0.3 --background-drift-phase-deg 25
+# Levels: about 0.4x the German residential weekly p95 (Blanco et al. 2015). Angles: pgml's
+# node-source `@deg` is the EMF angle relative to h times the fundamental voltage angle at
+# the SOURCE node (phi_h - h*phi_U1, cosine phasors), the convention of the measured
+# prevailing angles (h5 200, h7 0, h11 -50, h13 50 deg), which were measured at LV. A Dyn
+# transformer shifts an order h = 6k +/- 1 by k*180 deg relative to the fundamental (Dyn1
+# and Dyn11 alike), so h5, h7, h17, h19 enter at MV 180 deg below their LV value and h11,
+# h13 unchanged. Measured on CIGRE LV (pgml source, nominal load): the LV angles land
+# 9-15 deg from the targets (the source / transformer divider), within the 15 deg reading
+# precision of the measured angles. The measurement papers do not state a sine or cosine
+# reference; a sine reference would move h7 and h11 by 180 deg. h17 / h19 have no measured
+# prevailing angle and stay at 0.
+#
+# Validate:
+#   python -c "import yaml;from pgl.data.scenarios import EmissionLawScenarioConfig as R,CoherentSpectrumConfig as C; d=yaml.safe_load(open('run/configs/pgl_se_scenario_v4.yaml')); R.model_validate(d['random']); C.model_validate(d['coherent'])"
+
+random: # ------- randomized snapshots (pgl.data.scenarios.EmissionLawScenarioConfig) -------
+  n_samples: 1
+  seed: 0
+  method: sobol
+  factors:
+  - {name: demand}
+  parameters:
+  - name: load_scale
+    selector: {component: load}
+    distribution: {kind: uniform, low: 0.0, high: 1.0}
+    field: pq
+    mode: scale
+    correlation: {factor: demand, rho: 0.5}
+    symmetry: small_imbalance
+    imbalance: 0.15
+  - name: pv_scale
+    selector: {component: generator}
+    distribution: {kind: uniform, low: 0.0, high: 1.0}
+    field: pq
+    mode: scale
+    per: shared
+  - name: source_scale
+    selector: {component: source}
+    distribution: {kind: normal, loc: 1.0, scale: 0.0333}
+    field: u_ref
+    mode: scale
+    per: shared
+  - name: load_spectrum_household_h3
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.0915}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [3]
+  - name: load_spectrum_household_h5
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.0518}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [5]
+  - name: load_spectrum_household_h7
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.0277}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [7]
+  - name: load_spectrum_household_h9
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.0155}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [9]
+  - name: load_spectrum_household_h11
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.00965}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [11]
+  - name: load_spectrum_household_h13
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.00788}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [13]
+  - name: load_spectrum_household_h15
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.00624}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [15]
+  - name: load_spectrum_household_h17
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.00545}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [17]
+  - name: load_spectrum_household_h19
+    selector: {component: load, consumer_type: household}
+    distribution: {kind: uniform, low: 0.0, high: 0.00373}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [19]
+  - name: load_spectrum_office_h3
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.278}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [3]
+  - name: load_spectrum_office_h5
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.183}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [5]
+  - name: load_spectrum_office_h7
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.119}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [7]
+  - name: load_spectrum_office_h9
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.0574}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [9]
+  - name: load_spectrum_office_h11
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.0326}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [11]
+  - name: load_spectrum_office_h13
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.0241}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [13]
+  - name: load_spectrum_office_h15
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.0168}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [15]
+  - name: load_spectrum_office_h17
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.0152}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [17]
+  - name: load_spectrum_office_h19
+    selector: {component: load, consumer_type: office}
+    distribution: {kind: uniform, low: 0.0, high: 0.0132}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [19]
+  - name: load_spectrum_workshop_h3
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.135}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [3]
+  - name: load_spectrum_workshop_h5
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.0897}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [5]
+  - name: load_spectrum_workshop_h7
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.0576}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [7]
+  - name: load_spectrum_workshop_h9
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.0246}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [9]
+  - name: load_spectrum_workshop_h11
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.0176}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [11]
+  - name: load_spectrum_workshop_h13
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.0131}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [13]
+  - name: load_spectrum_workshop_h15
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.00879}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [15]
+  - name: load_spectrum_workshop_h17
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.00688}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [17]
+  - name: load_spectrum_workshop_h19
+    selector: {component: load, consumer_type: workshop}
+    distribution: {kind: uniform, low: 0.0, high: 0.00728}
+    field: h_mag
+    mode: absolute
+    per: each
+    orders: [19]
+  - name: spectrum_phase_low
+    selector: {component: load}
+    distribution: {kind: normal, loc: 0.0, scale: 32.5}
+    field: h_phase
+    mode: absolute
+    per: fixed
+    orders: [3, 5, 7, 9]
+  - name: spectrum_phase_high
+    selector: {component: load}
+    distribution: {kind: normal, loc: 0.0, scale: 65.0}
+    field: h_phase
+    mode: absolute
+    per: fixed
+    orders: [11, 13, 15, 17, 19]
+  - name: pv_spectrum_h3
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.01, high: 0.04}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [3]
+  - name: pv_spectrum_h5
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.02, high: 0.07}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [5]
+  - name: pv_spectrum_h7
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.01, high: 0.05}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [7]
+  - name: pv_spectrum_h9
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.005, high: 0.03}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [9]
+  - name: pv_spectrum_h11
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.002, high: 0.045}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [11]
+  - name: pv_spectrum_h13
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.002, high: 0.035}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [13]
+  - name: pv_spectrum_h15
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.001, high: 0.03}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [15]
+  - name: pv_spectrum_h17
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.001, high: 0.06}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [17]
+  - name: pv_spectrum_h19
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.001, high: 0.025}
+    field: h_mag
+    mode: absolute
+    per: fixed
+    orders: [19]
+  - name: pv_phase_low
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: normal, loc: 0.0, scale: 32.5}
+    field: h_phase
+    mode: absolute
+    per: fixed
+    orders: [3, 5, 7, 9]
+  - name: pv_phase_high
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: normal, loc: 0.0, scale: 65.0}
+    field: h_phase
+    mode: absolute
+    per: fixed
+    orders: [11, 13, 15, 17, 19]
+  - name: pv_emission_floor
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 0.43, high: 0.73}
+    field: h_param
+    mode: absolute
+    per: fixed
+    orders: [3, 5, 7, 9, 11, 13, 15, 17, 19]
+  - name: pv_emission_floor_phase
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: 100.0, high: 150.0}
+    field: h_param
+    mode: absolute
+    per: fixed
+    orders: [3, 5, 7, 9, 11, 13, 15, 17, 19]
+  - name: pv_emission_slope
+    selector: {component: generator, consumer_type: pv}
+    distribution: {kind: uniform, low: -25.0, high: 25.0}
+    field: h_param
+    mode: absolute
+    per: fixed
+    orders: [3, 5, 7, 9, 11, 13, 15, 17, 19]
+  emission_laws:
+  - {floor: pv_emission_floor, floor_phase: pv_emission_floor_phase, slope: pv_emission_slope}
+
+coherent: # ------- composed sequences (pgl.data.scenarios.CoherentSpectrumConfig) -------
+  name: coherent
+  selector: {component: generator, ids: null, consumer_type: null}
+  orders: [3]
+  n_steps: 1
+  n_scenarios: 1
+  n_modes: 2
+  seed: 0
+  mag_distribution: {kind: uniform, low: 0.0, high: 1.0}
+  harmonic_reference: iec61000-3-2
+  emission_class: auto
+  phase_distribution: {kind: normal, loc: 0.0, scale: 32.5}
+  jitter_mag: 0.05
+  jitter_phase_deg: 5.0
+  ar1_rho: 0.8
+  dwell: 0.9
+  step_size_s: 900.0
+  resample_modes_per_scenario: false
+  mode_bank_seed: null
+  parameters:
+  - name: load_scale
+    selector: {component: load, ids: null, consumer_type: null}
+    distribution: {kind: uniform, low: 0.0, high: 1.0}
+    field: pq
+    mode: scale
+    per: each
+    correlation: {factor: demand, rho: 0.5}
+    symmetry: small_imbalance
+    imbalance: 0.15
+    orders: null
+    harmonic_reference: null
+    emission_class: auto
+  - name: pv_scale
+    selector: {component: generator, ids: null, consumer_type: null}
+    distribution: {kind: uniform, low: 0.0, high: 1.0}
+    field: pq
+    mode: scale
+    per: shared
+    correlation: null
+    symmetry: balanced
+    imbalance: 0.0
+    orders: null
+    harmonic_reference: null
+    emission_class: auto
+  - name: source_scale
+    selector: {component: source, ids: null, consumer_type: null}
+    distribution: {kind: normal, loc: 1.0, scale: 0.0333}
+    field: u_ref
+    mode: scale
+    per: shared
+    correlation: null
+    symmetry: balanced
+    imbalance: 0.0
+    orders: null
+    harmonic_reference: null
+    emission_class: auto
+  factors:
+  - {name: demand}
+  profile:
+    selector: {component: generator, ids: null, consumer_type: null}
+    daily_amplitude: 1.0
+    level_min: 0.85
+    level_max: 1.15
+    amplitude_jitter_min: 0.8
+    amplitude_jitter_max: 1.2
+    phase_offset_hours: 1.0
+    behavioral_coupling: 0.3
+    cloud_coupling: 0.5
+    weekend_contrast: 0.15
+    seasonal_amplitude: 0.15
+    seasonal_peak_doy: 15.0
+    pv_seasonal_amplitude: 0.4
+    pv_seasonal_peak_doy: 172.0
+    pv_daylight_hours: 12.0
+    pv_daylight_swing: 4.0
+    short_rho: 0.9
+    short_sigma: 0.05
+  composition:
+    selector: null
+    classes:
+    - name: base_linear
+      sign: 1
+      rated_power_w: [150.0, 1500.0]
+      power_factor: 0.97
+      harmonic_magnitude: {}
+      emission_class: null
+      harmonic_phase_deg: {}
+      gamma: [0.0, 0.0]
+      phase_slope_deg: [0.0, 0.0]
+      emission_floor: [0.0, 0.0]
+      emission_floor_phase_deg: [0.0, 0.0]
+      activity_preset: household
+      discrete_activity: false
+      on_off_dwell: [0.85, 0.98]
+      loading_min: 0.3
+      loading_mean: [0.6, 1.0]
+      loading_jitter: 0.05
+      loading_rho: 0.85
+      states: []
+      state_dwell: [0.85, 0.97]
+    - name: electronics_smps
+      sign: 1
+      rated_power_w: [20.0, 400.0]
+      power_factor: 0.97
+      harmonic_magnitude:
+        '3': [0.5, 0.85]
+        '5': [0.25, 0.6]
+        '7': [0.1, 0.4]
+        '9': [0.05, 0.25]
+        '11': [0.03, 0.15]
+        '13': [0.02, 0.1]
+        '15': [0.015, 0.08]
+        '17': [0.01, 0.06]
+        '19': [0.008, 0.05]
+      emission_class: D
+      harmonic_phase_deg:
+        '3': [-55.0, 55.0]
+        '5': [-55.0, 55.0]
+        '7': [-55.0, 55.0]
+        '9': [-55.0, 55.0]
+        '11': [-105.0, 105.0]
+        '13': [-105.0, 105.0]
+        '15': [-105.0, 105.0]
+        '17': [-105.0, 105.0]
+        '19': [-105.0, 105.0]
+      gamma: [0.0, 0.0]
+      phase_slope_deg: [-20.0, 20.0]
+      emission_floor: [0.43, 0.73]
+      emission_floor_phase_deg: [100.0, 150.0]
+      activity_preset: household
+      discrete_activity: true
+      on_off_dwell: [0.5, 0.8]
+      loading_min: 0.1
+      loading_mean: [0.15, 0.9]
+      loading_jitter: 0.05
+      loading_rho: 0.85
+      states: []
+      state_dwell: [0.85, 0.97]
+    - name: ev_charger
+      sign: 1
+      rated_power_w: [3700.0, 11000.0]
+      power_factor: 0.98
+      harmonic_magnitude:
+        '3': [0.02, 0.08]
+        '5': [0.03, 0.1]
+        '7': [0.02, 0.06]
+        '9': [0.01, 0.04]
+        '11': [0.005, 0.025]
+        '13': [0.005, 0.025]
+        '15': [0.003, 0.016]
+        '17': [0.003, 0.015]
+        '19': [0.003, 0.014]
+      emission_class: null
+      harmonic_phase_deg:
+        '3': [-55.0, 55.0]
+        '5': [-55.0, 55.0]
+        '7': [-55.0, 55.0]
+        '9': [-55.0, 55.0]
+        '11': [-105.0, 105.0]
+        '13': [-105.0, 105.0]
+        '15': [-105.0, 105.0]
+        '17': [-105.0, 105.0]
+        '19': [-105.0, 105.0]
+      gamma: [0.0, 0.0]
+      phase_slope_deg: [-15.0, 15.0]
+      emission_floor: [0.43, 0.73]
+      emission_floor_phase_deg: [100.0, 150.0]
+      activity_preset: ev
+      discrete_activity: true
+      on_off_dwell: [0.6, 0.82]
+      loading_min: 0.2
+      loading_mean: [0.25, 1.0]
+      loading_jitter: 0.05
+      loading_rho: 0.85
+      states: []
+      state_dwell: [0.85, 0.97]
+    - name: pv_inverter
+      sign: -1
+      rated_power_w: [1000.0, 8000.0]
+      power_factor: 1.0
+      harmonic_magnitude:
+        '3': [0.01, 0.04]
+        '5': [0.02, 0.07]
+        '7': [0.01, 0.05]
+        '9': [0.005, 0.03]
+        '11': [0.002, 0.045]
+        '13': [0.002, 0.035]
+        '15': [0.001, 0.03]
+        '17': [0.001, 0.06]
+        '19': [0.001, 0.025]
+      emission_class: null
+      harmonic_phase_deg:
+        '3': [-55.0, 55.0]
+        '5': [-55.0, 55.0]
+        '7': [-55.0, 55.0]
+        '9': [-55.0, 55.0]
+        '11': [-105.0, 105.0]
+        '13': [-105.0, 105.0]
+        '15': [-105.0, 105.0]
+        '17': [-105.0, 105.0]
+        '19': [-105.0, 105.0]
+      gamma: [0.0, 0.0]
+      phase_slope_deg: [-25.0, 25.0]
+      emission_floor: [0.43, 0.73]
+      emission_floor_phase_deg: [100.0, 150.0]
+      activity_preset: pv
+      discrete_activity: false
+      on_off_dwell: [0.85, 0.98]
+      loading_min: 0.05
+      loading_mean: [0.2, 1.0]
+      loading_jitter: 0.05
+      loading_rho: 0.85
+      states: []
+      state_dwell: [0.85, 0.97]
+    - name: inverter_drive
+      sign: 1
+      rated_power_w: [500.0, 3000.0]
+      power_factor: 0.92
+      harmonic_magnitude:
+        '3': [0.08, 0.3]
+        '5': [0.15, 0.5]
+        '7': [0.08, 0.35]
+        '9': [0.03, 0.18]
+        '11': [0.02, 0.12]
+        '13': [0.015, 0.08]
+        '15': [0.01, 0.05]
+        '17': [0.008, 0.04]
+        '19': [0.005, 0.03]
+      emission_class: null
+      harmonic_phase_deg:
+        '3': [-55.0, 55.0]
+        '5': [-55.0, 55.0]
+        '7': [-55.0, 55.0]
+        '9': [-55.0, 55.0]
+        '11': [-105.0, 105.0]
+        '13': [-105.0, 105.0]
+        '15': [-105.0, 105.0]
+        '17': [-105.0, 105.0]
+        '19': [-105.0, 105.0]
+      gamma: [0.0, 0.0]
+      phase_slope_deg: [-30.0, 30.0]
+      emission_floor: [0.43, 0.73]
+      emission_floor_phase_deg: [100.0, 150.0]
+      activity_preset: household
+      discrete_activity: true
+      on_off_dwell: [0.6, 0.85]
+      loading_min: 0.15
+      loading_mean: [0.2, 1.0]
+      loading_jitter: 0.05
+      loading_rho: 0.85
+      states:
+      - {name: heating, power_fraction: 0.95, spectrum_scale: 0.2, weight: 0.5}
+      - {name: inverter, power_fraction: 0.35, spectrum_scale: 1.6, weight: 0.5}
+      state_dwell: [0.85, 0.97]
+    - name: heat_pump_inverter
+      sign: 1
+      rated_power_w: [2000.0, 12000.0]
+      power_factor: 0.95
+      harmonic_magnitude:
+        '3': [0.05, 0.15]
+        '5': [0.1, 0.3]
+        '7': [0.05, 0.2]
+        '9': [0.02, 0.08]
+        '11': [0.01, 0.05]
+        '13': [0.008, 0.035]
+        '15': [0.005, 0.025]
+        '17': [0.004, 0.02]
+        '19': [0.003, 0.015]
+      emission_class: null
+      harmonic_phase_deg:
+        '3': [-55.0, 55.0]
+        '5': [-55.0, 55.0]
+        '7': [-55.0, 55.0]
+        '9': [-55.0, 55.0]
+        '11': [-105.0, 105.0]
+        '13': [-105.0, 105.0]
+        '15': [-105.0, 105.0]
+        '17': [-105.0, 105.0]
+        '19': [-105.0, 105.0]
+      gamma: [0.0, 0.0]
+      phase_slope_deg: [-20.0, 20.0]
+      emission_floor: [0.43, 0.73]
+      emission_floor_phase_deg: [100.0, 150.0]
+      activity_preset: flat
+      discrete_activity: true
+      on_off_dwell: [0.9, 0.98]
+      loading_min: 0.15
+      loading_mean: [0.2, 0.95]
+      loading_jitter: 0.08
+      loading_rho: 0.85
+      states: []
+      state_dwell: [0.85, 0.97]
+    - name: resistive_heating
+      sign: 1
+      rated_power_w: [500.0, 3000.0]
+      power_factor: 1.0
+      harmonic_magnitude: {}
+      emission_class: null
+      harmonic_phase_deg: {}
+      gamma: [0.0, 0.0]
+      phase_slope_deg: [0.0, 0.0]
+      emission_floor: [0.0, 0.0]
+      emission_floor_phase_deg: [0.0, 0.0]
+      activity_preset: flat
+      discrete_activity: true
+      on_off_dwell: [0.5, 0.75]
+      loading_min: 0.9
+      loading_mean: [0.95, 1.0]
+      loading_jitter: 0.02
+      loading_rho: 0.85
+      states: []
+      state_dwell: [0.85, 0.97]
+    compositions:
+    - consumer_type: household
+      load_ids: null
+      classes:
+      - class_name: base_linear
+        count: [1, 1]
+        power_share: 1.5
+      - class_name: electronics_smps
+        count: [1, 3]
+        power_share: 1.0
+      - class_name: resistive_heating
+        count: [0, 1]
+        power_share: 1.0
+      - class_name: ev_charger
+        count: [0, 1]
+        power_share: 2.0
+      - class_name: heat_pump_inverter
+        count: [0, 1]
+        power_share: 2.0
+      - class_name: pv_inverter
+        count: [0, 1]
+        power_share: 1.0
+    - consumer_type: office
+      load_ids: null
+      classes:
+      - class_name: base_linear
+        count: [1, 1]
+        power_share: 2.0
+      - class_name: electronics_smps
+        count: [3, 10]
+        power_share: 2.0
+      - class_name: inverter_drive
+        count: [1, 3]
+        power_share: 2.5
+      - class_name: heat_pump_inverter
+        count: [0, 2]
+        power_share: 1.5
+    - consumer_type: restaurant
+      load_ids: null
+      classes:
+      - class_name: base_linear
+        count: [1, 1]
+        power_share: 2.0
+      - class_name: inverter_drive
+        count: [1, 3]
+        power_share: 2.5
+      - class_name: electronics_smps
+        count: [1, 4]
+        power_share: 1.0
+    - consumer_type: heat_pump
+      load_ids: null
+      classes:
+      - class_name: base_linear
+        count: [1, 1]
+        power_share: 1.0
+      - class_name: heat_pump_inverter
+        count: [1, 2]
+        power_share: 3.0
+    - consumer_type: workshop
+      load_ids: null
+      classes:
+      - class_name: base_linear
+        count: [1, 1]
+        power_share: 1.5
+      - class_name: inverter_drive
+        count: [2, 4]
+        power_share: 3.0
+      - class_name: electronics_smps
+        count: [1, 4]
+        power_share: 1.0
+      - class_name: resistive_heating
+        count: [0, 1]
+        power_share: 0.5
+    - consumer_type: ev_charging
+      load_ids: null
+      classes:
+      - class_name: base_linear
+        count: [0, 1]
+        power_share: 0.5
+      - class_name: ev_charger
+        count: [1, 2]
+        power_share: 1.0
+    - consumer_type: pv
+      load_ids: null
+      classes:
+      - class_name: pv_inverter
+        count: [1, 1]
+        power_share: 1.0
+    - consumer_type: null
+      load_ids: null
+      classes:
+      - class_name: base_linear
+        count: [1, 1]
+        power_share: 2.0
+      - class_name: electronics_smps
+        count: [1, 2]
+        power_share: 1.0
+      - class_name: inverter_drive
+        count: [0, 1]
+        power_share: 1.0
+    scale_to_nominal: true
+    max_injection_pu: 3.0
+    behavioral_coupling: 0.3
+    cloud_coupling: 0.5
+    activity_scale: 1.0
+    roster_seed: null
+  background: null
+  start_time: '2024-06-21T16:00:00'
+  allow_silent_orders: []

@@ -1,0 +1,1010 @@
+{
+ "source": {
+  "repository": "power-grid-ml/pgl",
+  "commit": "4e457e308365d1281ffe410c2df8442ba5b740e2",
+  "note": "every file is the source file at this commit after the rename of tools/check_vendored.py (configuration files: verbatim); deviations are listed per file"
+ },
+ "files": [
+  {
+   "path": "src/injection_hse/__init__.py",
+   "source": "src/pgl/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/_switches.py",
+   "source": "src/pgl/_switches.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/analysis/__init__.py",
+   "source": "src/pgl/analysis/__init__.py",
+   "status": "modified",
+   "note": "the re-exports and docstring entries of the four analysis modules not vendored (ablation, feasibility, headroom and the multi-grid report) are removed"
+  },
+  {
+   "path": "src/injection_hse/analysis/__main__.py",
+   "source": "src/pgl/analysis/__main__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/analysis/attribution.py",
+   "source": "src/pgl/analysis/attribution.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/analysis/baselines.py",
+   "source": "src/pgl/analysis/baselines.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/analysis/binning.py",
+   "source": "src/pgl/analysis/binning.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/analysis/gradients.py",
+   "source": "src/pgl/analysis/gradients.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/analysis/occlusion.py",
+   "source": "src/pgl/analysis/occlusion.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/analysis/report.py",
+   "source": "src/pgl/analysis/report.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/analysis/style.py",
+   "source": "src/pgl/analysis/style.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/calibration.py",
+   "source": "src/pgl/calibration.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/config.py",
+   "source": "src/pgl/config.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/curriculum.py",
+   "source": "src/pgl/curriculum.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/__init__.py",
+   "source": "src/pgl/data/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/coupling.py",
+   "source": "src/pgl/data/coupling.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/currents.py",
+   "source": "src/pgl/data/currents.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/encodings.py",
+   "source": "src/pgl/data/encodings.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/graph.py",
+   "source": "src/pgl/data/graph.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/instrument.py",
+   "source": "src/pgl/data/instrument.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/measurement.py",
+   "source": "src/pgl/data/measurement.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/multigraph.py",
+   "source": "src/pgl/data/multigraph.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/multigrid.py",
+   "source": "src/pgl/data/multigrid.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/noise.py",
+   "source": "src/pgl/data/noise.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/physics.py",
+   "source": "src/pgl/data/physics.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/__init__.py",
+   "source": "src/pgl/data/scenarios/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/coherent.py",
+   "source": "src/pgl/data/scenarios/coherent.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/composition.py",
+   "source": "src/pgl/data/scenarios/composition.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/config.py",
+   "source": "src/pgl/data/scenarios/config.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/discrete.py",
+   "source": "src/pgl/data/scenarios/discrete.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/emission.py",
+   "source": "src/pgl/data/scenarios/emission.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/emission_caps.py",
+   "source": "src/pgl/data/scenarios/emission_caps.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/perturbation.py",
+   "source": "src/pgl/data/scenarios/perturbation.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/presets.py",
+   "source": "src/pgl/data/scenarios/presets.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/scenarios/profiles.py",
+   "source": "src/pgl/data/scenarios/profiles.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/sources.py",
+   "source": "src/pgl/data/sources.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/topology.py",
+   "source": "src/pgl/data/topology.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/data/validate.py",
+   "source": "src/pgl/data/validate.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/encoding.py",
+   "source": "src/pgl/encoding.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/__init__.py",
+   "source": "src/pgl/evaluation/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/__main__.py",
+   "source": "src/pgl/evaluation/__main__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/error_heatmap.py",
+   "source": "src/pgl/evaluation/error_heatmap.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/history.py",
+   "source": "src/pgl/evaluation/history.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/inference.py",
+   "source": "src/pgl/evaluation/inference.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/insight_plots.py",
+   "source": "src/pgl/evaluation/insight_plots.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/loss_heatmap.py",
+   "source": "src/pgl/evaluation/loss_heatmap.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/report.py",
+   "source": "src/pgl/evaluation/report.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/evaluation/state_plots.py",
+   "source": "src/pgl/evaluation/state_plots.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/io.py",
+   "source": "src/pgl/io.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/loss.py",
+   "source": "src/pgl/loss.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/masking.py",
+   "source": "src/pgl/masking.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/metrics.py",
+   "source": "src/pgl/metrics.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/models/__init__.py",
+   "source": "src/pgl/models/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/models/base.py",
+   "source": "src/pgl/models/base.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/models/dnn.py",
+   "source": "src/pgl/models/dnn.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/models/gnn.py",
+   "source": "src/pgl/models/gnn.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/models/graphormer.py",
+   "source": "src/pgl/models/graphormer.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/models/injection.py",
+   "source": "src/pgl/models/injection.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/models/temporal.py",
+   "source": "src/pgl/models/temporal.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/normalization.py",
+   "source": "src/pgl/normalization.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/physics.py",
+   "source": "src/pgl/physics.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/py.typed",
+   "source": "src/pgl/py.typed",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/time_features.py",
+   "source": "src/pgl/time_features.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/__init__.py",
+   "source": "src/pgl/train/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/__main__.py",
+   "source": "src/pgl/train/__main__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/anchoring.py",
+   "source": "src/pgl/train/anchoring.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/checkpoint.py",
+   "source": "src/pgl/train/checkpoint.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/cli.py",
+   "source": "src/pgl/train/cli.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/distillation.py",
+   "source": "src/pgl/train/distillation.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/dtypes.py",
+   "source": "src/pgl/train/dtypes.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/layout.py",
+   "source": "src/pgl/train/layout.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/loop.py",
+   "source": "src/pgl/train/loop.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/module.py",
+   "source": "src/pgl/train/module.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/multigrid.py",
+   "source": "src/pgl/train/multigrid.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/preconditioner.py",
+   "source": "src/pgl/train/preconditioner.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/priors.py",
+   "source": "src/pgl/train/priors.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/train/stages.py",
+   "source": "src/pgl/train/stages.py",
+   "status": "renamed"
+  },
+  {
+   "path": "src/injection_hse/workflow.py",
+   "source": "src/pgl/workflow.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/__init__.py",
+   "source": "tests/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/differentiability/__init__.py",
+   "source": "tests/differentiability/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/differentiability/test_calibrated_anchor_gradcheck.py",
+   "source": "tests/differentiability/test_calibrated_anchor_gradcheck.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/differentiability/test_multigrid_decode_gradcheck.py",
+   "source": "tests/differentiability/test_multigrid_decode_gradcheck.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/gpu/__init__.py",
+   "source": "tests/gpu/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/gpu/test_injection_decode_parity.py",
+   "source": "tests/gpu/test_injection_decode_parity.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/gpu/test_instrument_noise_device.py",
+   "source": "tests/gpu/test_instrument_noise_device.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/gpu/test_multigrid_decode_parity.py",
+   "source": "tests/gpu/test_multigrid_decode_parity.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/__init__.py",
+   "source": "tests/pgl/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/__init__.py",
+   "source": "tests/pgl/analysis/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/conftest.py",
+   "source": "tests/pgl/analysis/conftest.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/test_attribution.py",
+   "source": "tests/pgl/analysis/test_attribution.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/test_baselines.py",
+   "source": "tests/pgl/analysis/test_baselines.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/test_binning.py",
+   "source": "tests/pgl/analysis/test_binning.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/test_gradients.py",
+   "source": "tests/pgl/analysis/test_gradients.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/test_occlusion.py",
+   "source": "tests/pgl/analysis/test_occlusion.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/test_report.py",
+   "source": "tests/pgl/analysis/test_report.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/analysis/test_style.py",
+   "source": "tests/pgl/analysis/test_style.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/conftest.py",
+   "source": "tests/pgl/conftest.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/evaluation/__init__.py",
+   "source": "tests/pgl/evaluation/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/evaluation/conftest.py",
+   "source": "tests/pgl/evaluation/conftest.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/evaluation/test_checkpoint_identity.py",
+   "source": "tests/pgl/evaluation/test_checkpoint_identity.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/evaluation/test_history.py",
+   "source": "tests/pgl/evaluation/test_history.py",
+   "status": "modified",
+   "note": "one test that reads a store through the multi-grid report (not vendored) is removed"
+  },
+  {
+   "path": "tests/injection_hse/evaluation/test_inference.py",
+   "source": "tests/pgl/evaluation/test_inference.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/evaluation/test_loss_heatmap.py",
+   "source": "tests/pgl/evaluation/test_loss_heatmap.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/evaluation/test_plots.py",
+   "source": "tests/pgl/evaluation/test_plots.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/evaluation/test_report.py",
+   "source": "tests/pgl/evaluation/test_report.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/__init__.py",
+   "source": "tests/pgl/scenarios/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/conftest.py",
+   "source": "tests/pgl/scenarios/conftest.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/data/emission_law_reference.json",
+   "source": "tests/pgl/scenarios/data/emission_law_reference.json",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_coherent_emission_reference.py",
+   "source": "tests/pgl/scenarios/test_coherent_emission_reference.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_coherent_fingerprint.py",
+   "source": "tests/pgl/scenarios/test_coherent_fingerprint.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_coherent_fundamental.py",
+   "source": "tests/pgl/scenarios/test_coherent_fundamental.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_composition.py",
+   "source": "tests/pgl/scenarios/test_composition.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_discrete_emitters.py",
+   "source": "tests/pgl/scenarios/test_discrete_emitters.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_emission_caps.py",
+   "source": "tests/pgl/scenarios/test_emission_caps.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_emission_law.py",
+   "source": "tests/pgl/scenarios/test_emission_law.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_emission_law_ranges.py",
+   "source": "tests/pgl/scenarios/test_emission_law_ranges.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_emission_law_reference.py",
+   "source": "tests/pgl/scenarios/test_emission_law_reference.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_emission_persistence.py",
+   "source": "tests/pgl/scenarios/test_emission_persistence.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_grid_perturbation.py",
+   "source": "tests/pgl/scenarios/test_grid_perturbation.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_load_profiles.py",
+   "source": "tests/pgl/scenarios/test_load_profiles.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_presets.py",
+   "source": "tests/pgl/scenarios/test_presets.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_realized_injections_composed.py",
+   "source": "tests/pgl/scenarios/test_realized_injections_composed.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/scenarios/test_start_time_range.py",
+   "source": "tests/pgl/scenarios/test_start_time_range.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_anchor_calibration.py",
+   "source": "tests/pgl/test_anchor_calibration.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_anchor_state.py",
+   "source": "tests/pgl/test_anchor_state.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_anchoring.py",
+   "source": "tests/pgl/test_anchoring.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_calibration.py",
+   "source": "tests/pgl/test_calibration.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_composition_data.py",
+   "source": "tests/pgl/test_composition_data.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_current_base.py",
+   "source": "tests/pgl/test_current_base.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_current_input.py",
+   "source": "tests/pgl/test_current_input.py",
+   "status": "modified",
+   "note": "two tests of the deployment engine (not vendored) are removed"
+  },
+  {
+   "path": "tests/injection_hse/test_curriculum.py",
+   "source": "tests/pgl/test_curriculum.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_data.py",
+   "source": "tests/pgl/test_data.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_determinism.py",
+   "source": "tests/pgl/test_determinism.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_direct_stages.py",
+   "source": "tests/pgl/test_direct_stages.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_edge_currents.py",
+   "source": "tests/pgl/test_edge_currents.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_encodings.py",
+   "source": "tests/pgl/test_encodings.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_gnn.py",
+   "source": "tests/pgl/test_gnn.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_graphormer.py",
+   "source": "tests/pgl/test_graphormer.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_harmonic_slack.py",
+   "source": "tests/pgl/test_harmonic_slack.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_heterogeneous.py",
+   "source": "tests/pgl/test_heterogeneous.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_injection.py",
+   "source": "tests/pgl/test_injection.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_injection_encoding.py",
+   "source": "tests/pgl/test_injection_encoding.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_injection_state_loss.py",
+   "source": "tests/pgl/test_injection_state_loss.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_input_priors.py",
+   "source": "tests/pgl/test_input_priors.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_instrument_noise.py",
+   "source": "tests/pgl/test_instrument_noise.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_io.py",
+   "source": "tests/pgl/test_io.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_load_shunt.py",
+   "source": "tests/pgl/test_load_shunt.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_loss_geometry.py",
+   "source": "tests/pgl/test_loss_geometry.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_loss_model.py",
+   "source": "tests/pgl/test_loss_model.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_loss_tracking.py",
+   "source": "tests/pgl/test_loss_tracking.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_metrics.py",
+   "source": "tests/pgl/test_metrics.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_module_provenance.py",
+   "source": "tests/pgl/test_module_provenance.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_multigrid.py",
+   "source": "tests/pgl/test_multigrid.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_multigrid_contract.py",
+   "source": "tests/pgl/test_multigrid_contract.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_multigrid_estimator.py",
+   "source": "tests/pgl/test_multigrid_estimator.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_multigrid_harmonic_slack.py",
+   "source": "tests/pgl/test_multigrid_harmonic_slack.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_multigrid_injection.py",
+   "source": "tests/pgl/test_multigrid_injection.py",
+   "status": "modified",
+   "note": "test_a_batch_without_injection_is_unchanged is removed: it fails in the source code base as well and covers the multi-grid data path, which the paper's runs do not use"
+  },
+  {
+   "path": "tests/injection_hse/test_multigrid_noise_anchor_draw.py",
+   "source": "tests/pgl/test_multigrid_noise_anchor_draw.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_noise.py",
+   "source": "tests/pgl/test_noise.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_normalization.py",
+   "source": "tests/pgl/test_normalization.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_operator_cache.py",
+   "source": "tests/pgl/test_operator_cache.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_per_unit_frame.py",
+   "source": "tests/pgl/test_per_unit_frame.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_phase_coupling.py",
+   "source": "tests/pgl/test_phase_coupling.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_physics.py",
+   "source": "tests/pgl/test_physics.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_plain_decode_loss.py",
+   "source": "tests/pgl/test_plain_decode_loss.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_prior_distillation.py",
+   "source": "tests/pgl/test_prior_distillation.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_prior_refit.py",
+   "source": "tests/pgl/test_prior_refit.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_profile_data.py",
+   "source": "tests/pgl/test_profile_data.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_recipe_v4.py",
+   "source": "tests/pgl/test_recipe_v4.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_sequence_step.py",
+   "source": "tests/pgl/test_sequence_step.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_sequence_time_data.py",
+   "source": "tests/pgl/test_sequence_time_data.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_slack_measurement.py",
+   "source": "tests/pgl/test_slack_measurement.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_split.py",
+   "source": "tests/pgl/test_split.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_stage_manager_provenance.py",
+   "source": "tests/pgl/test_stage_manager_provenance.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_stage_optimizer_carry.py",
+   "source": "tests/pgl/test_stage_optimizer_carry.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_switch_currents.py",
+   "source": "tests/pgl/test_switch_currents.py",
+   "status": "modified",
+   "note": "one test of the deployment measurement mapping (not vendored) is removed"
+  },
+  {
+   "path": "tests/injection_hse/test_temporal.py",
+   "source": "tests/pgl/test_temporal.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_tied_rows.py",
+   "source": "tests/pgl/test_tied_rows.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_time_features.py",
+   "source": "tests/pgl/test_time_features.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_topology.py",
+   "source": "tests/pgl/test_topology.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_train_dtype.py",
+   "source": "tests/pgl/test_train_dtype.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_train_experiment.py",
+   "source": "tests/pgl/test_train_experiment.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_validate.py",
+   "source": "tests/pgl/test_validate.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_workflow.py",
+   "source": "tests/pgl/test_workflow.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/test_workflow_driver.py",
+   "source": "tests/pgl/test_workflow_driver.py",
+   "status": "renamed"
+  },
+  {
+   "path": "tests/injection_hse/tiny_grids.py",
+   "source": "tests/pgl/tiny_grids.py",
+   "status": "renamed"
+  },
+  {
+   "path": "run/examples/injection_hse/__init__.py",
+   "source": "run/examples/pgl/__init__.py",
+   "status": "renamed"
+  },
+  {
+   "path": "run/examples/injection_hse/_common.py",
+   "source": "run/examples/pgl/_common.py",
+   "status": "renamed"
+  },
+  {
+   "path": "run/examples/injection_hse/train_se_full_workflow.py",
+   "source": "run/examples/pgl/train_se_full_workflow.py",
+   "status": "renamed"
+  },
+  {
+   "path": "run/examples/injection_hse/generate_se_task_datasets.py",
+   "source": "run/examples/pgl/generate_se_task_datasets.py",
+   "status": "renamed"
+  },
+  {
+   "path": "run/examples/injection_hse/scenario_coverage.py",
+   "source": "run/examples/pgl/scenario_coverage.py",
+   "status": "renamed"
+  },
+  {
+   "path": "run/examples/injection_hse/headroom_probe.py",
+   "source": "run/examples/pgl/headroom_probe.py",
+   "status": "partial",
+   "note": "only CIGRE_LV_SENSORS and default_sensors, which generate_se_task_datasets.py imports; the probe itself is not vendored"
+  },
+  {
+   "path": "run/configs/pgl_se_scenario_v4.yaml",
+   "source": "run/configs/pgl_se_scenario_v4.yaml",
+   "status": "renamed",
+   "rename": false
+  },
+  {
+   "path": "run/configs/pgl_device_capacitance.yaml",
+   "source": "run/configs/pgl_device_capacitance.yaml",
+   "status": "renamed",
+   "rename": false
+  },
+  {
+   "path": "run/configs/pgl_grid_perturbation.yaml",
+   "source": "run/configs/pgl_grid_perturbation.yaml",
+   "status": "renamed",
+   "rename": false
+  },
+  {
+   "path": "run/configs/expected_ranges.yaml",
+   "source": "run/configs/expected_ranges.yaml",
+   "status": "renamed",
+   "rename": false
+  }
+ ],
+ "not_vendored": {
+  "src": [
+   "src/pgl/inference/ (deployment on measured data)",
+   "src/pgl/analysis/multigrid/ (cross-grid report)",
+   "src/pgl/analysis/ablation.py",
+   "src/pgl/analysis/feasibility.py",
+   "src/pgl/analysis/headroom.py"
+  ],
+  "drivers": "every other script of run/examples/pgl/",
+  "configs": "every other file of run/configs/"
+ }
+}

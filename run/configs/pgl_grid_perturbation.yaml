@@ -1,0 +1,32 @@
+# Network-model error study: generate data on perturbed copies of the grid while the
+# estimator keeps the nominal grid description.
+# Schema: pgl.data.scenarios.GridPerturbationConfig (the `grid_perturbation:` block).
+# Used by: --grid-perturbation of run/examples/pgl/train_se_full_workflow.py, together with
+# --perturb-train {nominal,perturbed} and --perturb-test {none,heldout,train}.
+#
+# Every element's factor = (one factor shared by its kind) x (its own factor). Log-normal
+# spreads are the std of log(factor) (about the relative std for small values); uniform
+# spreads are the half-width of factor - 1 and must stay below 1.
+grid_perturbation:
+  n_copies: 8            # copies of the "train" pool (--perturb-copies overrides)
+  n_test_copies: 4       # copies of the held-out "test" pool (null = n_copies)
+  distribution: lognormal
+  seed: 0
+  line_r:                # conductor resistance (geometry) / resistance matrix (explicit)
+    shared: 0.05
+    element: 0.10
+  line_x:                # positive-sequence reactance / inductance matrix
+    shared: 0.0
+    element: 0.05
+  line_length:           # scales R, L and C of the line together
+    shared: 0.02
+    element: 0.05
+  transformer_r:
+    shared: 0.0
+    element: 0.10
+  transformer_x:
+    shared: 0.0
+    element: 0.05
+  source_impedance:      # Thevenin R and L of the supply (short-circuit power 1/factor)
+    shared: 0.30
+    element: 0.0
